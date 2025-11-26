@@ -54,7 +54,7 @@ export const PatientSearch: React.FC<{ onNavigate: (s: Screen, p?: Patient) => v
   }, [query, filterType, filterDate]);
 
   return (
-    <div className="min-h-screen bg-zennara-bg pb-32">
+    <div className="min-h-screen bg-zennara-bg pb-40">
       <Header 
         showBack 
         onBack={onBack} 

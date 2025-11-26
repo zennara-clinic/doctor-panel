@@ -33,7 +33,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack, onLogout, onNavigate
   };
 
   return (
-    <div className="min-h-screen bg-zennara-bg pb-32">
+    <div className="min-h-screen bg-zennara-bg pb-40">
       <Header 
         showBack 
         onBack={onBack} 

@@ -73,9 +73,9 @@ const App: React.FC = () => {
       case Screen.SEARCH:
          return <PatientSearch onNavigate={navigate} onBack={() => navigate(Screen.DASHBOARD)} />;
       case Screen.HISTORY:
-         return <MedicalHistory patient={currentPatient} onBack={() => navigate(Screen.DASHBOARD)} />;
+         return <MedicalHistory patient={currentPatient} onBack={() => navigate(Screen.DASHBOARD)} onNavigate={navigate} />;
       case Screen.SETTINGS:
-         return <Settings onBack={() => navigate(Screen.DASHBOARD)} />;
+         return <Settings onBack={() => navigate(Screen.DASHBOARD)} onNavigate={navigate} />;
       case Screen.HELP:
          return <Help onBack={() => navigate(Screen.DASHBOARD)} />;
       case Screen.TEMPLATE_MANAGEMENT: // New Route

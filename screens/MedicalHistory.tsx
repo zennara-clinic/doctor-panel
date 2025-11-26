@@ -43,7 +43,7 @@ export const MedicalHistory: React.FC<MedicalHistoryProps> = ({ patient, onBack,
   const handleEditInfo = () => alert('Edit Patient Information (Demo)');
 
   return (
-    <div className="min-h-screen bg-zennara-bg pb-32">
+    <div className="min-h-screen bg-zennara-bg pb-40">
       <Header 
         showBack 
         onBack={onBack} 

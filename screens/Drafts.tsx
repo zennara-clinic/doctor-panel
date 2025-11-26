@@ -21,7 +21,7 @@ export const Drafts: React.FC<{ onNavigate: (screen: Screen) => void; onBack: ()
   };
 
   return (
-    <div className="min-h-screen bg-zennara-bg pb-32">
+    <div className="min-h-screen bg-zennara-bg pb-40">
       <Header 
         showBack 
         onBack={onBack} 

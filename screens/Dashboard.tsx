@@ -18,7 +18,7 @@ const mockPatients: Patient[] = [
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-zennara-bg pb-32">
+    <div className="min-h-screen bg-zennara-bg pb-40">
       <Header 
         title="TODAY'S PATIENTS" 
         subtitle="Tuesday, November 25, 2025 • 12 appointments"
