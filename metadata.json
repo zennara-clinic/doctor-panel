@@ -1,0 +1,7 @@
+{
+  "name": "Zennara Doctor Panel",
+  "description": "Ultra-simplified, tablet-first doctor panel designed for non-tech medical professionals with a focus on one-tap actions.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
