@@ -148,15 +148,14 @@ export const BottomNavigation: React.FC<{ activeScreen: Screen; onNavigate: (s: 
   const items = [
     { icon: <Home size={28} />, label: 'HOME', nav: Screen.DASHBOARD },
     { icon: <FileText size={28} />, label: 'DRAFTS', nav: Screen.DRAFTS },
-    { icon: <Search size={28} />, label: 'SEARCH', nav: Screen.SEARCH },
-    { icon: <History size={28} />, label: 'HISTORY', nav: Screen.HISTORY },
+    { icon: <History size={28} />, label: 'HISTORY', nav: Screen.HISTORY_PATIENT_LIST },
     { icon: <Settings size={28} />, label: 'SETTINGS', nav: Screen.SETTINGS },
   ];
 
   return (
     <div className="fixed bottom-6 left-6 right-6 h-[90px] bg-white/95 backdrop-blur-xl rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex items-center justify-around px-2 z-50 animate-fade-in">
       {items.map((item, idx) => {
-        const isActive = activeScreen === item.nav;
+        const isActive = activeScreen === item.nav || (item.nav === Screen.HISTORY_PATIENT_LIST && activeScreen === Screen.HISTORY);
         return (
           <button 
             key={idx}
@@ -214,7 +213,7 @@ export const Header: React.FC<{
     <div className="h-24"></div>
 
     {/* Page Navigation Bar */}
-    <div className="flex items-center justify-between px-2">
+    <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 lg:px-8">
       {showBack && (
         <button onClick={onBack} className="text-zennara-green font-sans text-xl font-medium flex items-center h-16 px-4 -ml-4 hover:bg-gray-50 rounded-2xl transition-all active:scale-95 group">
           <ChevronLeft size={32} className="mr-1 group-hover:-translate-x-1 transition-transform" /> BACK
@@ -226,7 +225,7 @@ export const Header: React.FC<{
 
     {/* Page Title */}
     {(title || subtitle) && (
-      <div className="px-2 animate-fade-in">
+      <div className="px-4 sm:px-5 md:px-6 lg:px-8 animate-fade-in">
         {title && <h1 className="font-serif text-4xl text-zennara-dark font-bold mb-2 tracking-tight">{title}</h1>}
         {subtitle && <p className="font-sans text-xl text-zennara-light">{subtitle}</p>}
       </div>

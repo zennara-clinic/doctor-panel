@@ -54,7 +54,7 @@ export const PatientSearch: React.FC<{ onNavigate: (s: Screen, p?: Patient) => v
   }, [query, filterType, filterDate]);
 
   return (
-    <div className="min-h-screen bg-zennara-bg pb-40">
+    <div className="min-h-screen bg-zennara-bg pb-32 md:pb-40">
       <Header 
         showBack 
         onBack={onBack} 
@@ -64,11 +64,11 @@ export const PatientSearch: React.FC<{ onNavigate: (s: Screen, p?: Patient) => v
         subtitle="Search by name, ID, or phone" 
       />
 
-      <div className="px-6 flex flex-col gap-8">
+      <div className="px-4 sm:px-5 md:px-6 lg:px-8 max-w-6xl mx-auto flex flex-col gap-6 md:gap-7">
         {/* Search Bar */}
-        <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+        <div className="bg-white p-2 md:p-2.5 rounded-xl md:rounded-2xl shadow-sm md:shadow-md border border-gray-200">
            <input 
-             className="w-full h-[88px] px-6 text-3xl font-serif outline-none placeholder:text-gray-300 bg-transparent"
+             className="w-full h-16 md:h-20 lg:h-[88px] px-4 md:px-5 lg:px-6 text-xl md:text-2xl lg:text-3xl font-serif outline-none placeholder:text-gray-300 bg-transparent"
              placeholder="Type name or ID..."
              value={query}
              onChange={(e) => setQuery(e.target.value)}
@@ -77,7 +77,7 @@ export const PatientSearch: React.FC<{ onNavigate: (s: Screen, p?: Patient) => v
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <Select 
             label="Filter by Type"
             value={filterType}
@@ -103,33 +103,33 @@ export const PatientSearch: React.FC<{ onNavigate: (s: Screen, p?: Patient) => v
         </div>
 
         {/* Results */}
-        <div className="flex flex-col gap-4">
-           <h2 className="font-serif text-2xl text-zennara-dark ml-2">RESULTS ({results.length})</h2>
+        <div className="flex flex-col gap-3 md:gap-4">
+           <h2 className="font-serif text-xl md:text-2xl text-zennara-dark font-bold">RESULTS ({results.length})</h2>
            
            {results.length > 0 ? (
              results.map(p => (
-               <Card key={p.id} onClick={() => onNavigate(Screen.PATIENT_OVERVIEW)} className="hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                  <div className="flex justify-between items-center">
-                     <div className="flex items-center gap-6">
-                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-zennara-green to-teal-800 text-white flex items-center justify-center font-serif text-2xl shadow-md">
+               <Card key={p.id} onClick={() => onNavigate(Screen.PATIENT_OVERVIEW)} className="hover:bg-gray-50 active:bg-gray-100 transition-all hover:shadow-lg cursor-pointer">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-5">
+                     <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
+                       <div className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-zennara-green to-teal-800 text-white flex items-center justify-center font-serif text-lg md:text-xl lg:text-2xl shadow-md shrink-0">
                          {p.name.charAt(0)}
                        </div>
-                       <div>
-                          <h3 className="font-serif text-2xl font-bold text-zennara-dark">{p.name}</h3>
-                          <p className="text-zennara-light text-lg">{p.id} • {p.details}</p>
+                       <div className="flex-1 min-w-0">
+                          <h3 className="font-serif text-lg md:text-xl lg:text-2xl font-bold text-zennara-dark truncate">{p.name}</h3>
+                          <p className="text-zennara-light text-sm md:text-base lg:text-lg truncate">{p.id} • {p.details}</p>
                        </div>
                      </div>
-                     <div className="flex flex-col items-end gap-2">
-                        <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">{p.type}</span>
-                        <Button variant="ghost" size="medium" className="text-zennara-green">VIEW →</Button>
+                     <div className="flex sm:flex-col items-center sm:items-end gap-2 justify-between sm:justify-start">
+                        <span className="bg-gray-100 text-gray-600 px-2.5 py-1 md:px-3 rounded-full text-xs md:text-sm font-medium">{p.type}</span>
+                        <Button variant="ghost" size="medium" className="text-zennara-green text-sm md:text-base">VIEW →</Button>
                      </div>
                   </div>
                </Card>
              ))
            ) : (
-             <div className="text-center py-12 opacity-50">
-               <span className="text-6xl block mb-4">🔍</span>
-               <p className="text-xl font-sans">No patients found matching your criteria.</p>
+             <div className="text-center py-12 md:py-16 opacity-50">
+               <span className="text-5xl md:text-6xl block mb-3 md:mb-4">🔍</span>
+               <p className="text-lg md:text-xl font-sans">No patients found matching your criteria.</p>
              </div>
            )}
         </div>

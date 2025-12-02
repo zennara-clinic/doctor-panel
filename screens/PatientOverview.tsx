@@ -10,8 +10,12 @@ interface OverviewProps {
 }
 
 export const PatientOverview: React.FC<OverviewProps> = ({ patient, onNavigate, onBack }) => {
+  const handleViewLastPrescription = () => {
+    onNavigate(Screen.VIEW_LAST_PRESCRIPTION);
+  };
+
   return (
-    <div className="min-h-screen bg-zennara-bg pb-8">
+    <div className="min-h-screen bg-zennara-bg pb-8 md:pb-12">
       <Header 
         showBack 
         onBack={onBack}
@@ -19,67 +23,67 @@ export const PatientOverview: React.FC<OverviewProps> = ({ patient, onNavigate, 
         subtitle={`${patient.age} years • ${patient.gender} • Blood Group: O+`}
       />
 
-      <div className="px-6 flex flex-col gap-6">
+      <div className="px-4 sm:px-5 md:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col gap-5 md:gap-6">
         
         {/* Allergy Alert - Huge */}
         {patient.allergies && patient.allergies.length > 0 && (
-          <div className="bg-red-600 rounded-xl p-6 shadow-md text-white">
-             <div className="flex items-center gap-3 mb-2">
-               <AlertTriangle size={36} className="text-white" />
-               <h2 className="font-sans text-2xl font-bold">ALLERGY ALERT</h2>
+          <div className="bg-red-600 rounded-xl md:rounded-2xl p-5 md:p-6 lg:p-7 shadow-lg text-white">
+             <div className="flex items-center gap-2.5 md:gap-3 mb-2 md:mb-3">
+               <AlertTriangle size={28} className="text-white md:w-9 md:h-9" />
+               <h2 className="font-sans text-xl md:text-2xl font-bold">ALLERGY ALERT</h2>
              </div>
-             <p className="font-sans text-xl opacity-90 mb-4">This patient is ALLERGIC to:</p>
-             <ul className="list-disc list-inside font-serif text-4xl font-bold mb-4">
+             <p className="font-sans text-lg md:text-xl opacity-90 mb-3 md:mb-4">This patient is ALLERGIC to:</p>
+             <ul className="list-disc list-inside font-serif text-3xl md:text-4xl font-bold mb-3 md:mb-4">
                {patient.allergies.map(a => <li key={a}>{a.toUpperCase()}</li>)}
              </ul>
-             <p className="font-sans text-lg italic opacity-90">Do NOT prescribe penicillin-based antibiotics.</p>
+             <p className="font-sans text-base md:text-lg italic opacity-90">Do NOT prescribe penicillin-based antibiotics.</p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
           <Card>
-            <h3 className="font-sans text-xl font-bold text-zennara-dark mb-4 flex items-center gap-2">
-              <FileText size={24} className="text-zennara-light" />
-              LAST VISIT: Nov 10 (15 days ago)
+            <h3 className="font-sans text-lg md:text-xl font-bold text-zennara-dark mb-3 md:mb-4 flex items-center gap-2">
+              <FileText size={20} className="text-zennara-light md:w-6 md:h-6" />
+              <span className="leading-tight">LAST VISIT: Nov 10 (15 days ago)</span>
             </h3>
-            <ul className="font-sans text-xl text-zennara-light space-y-3">
+            <ul className="font-sans text-base md:text-lg lg:text-xl text-zennara-light space-y-2 md:space-y-2.5 lg:space-y-3">
               <li>• Prescribed Doxycycline 100mg</li>
               <li>• Assigned Carbon Laser Facial</li>
               <li>• Therapist: Meera Patel</li>
             </ul>
-            <div className="mt-6">
-              <Button variant="secondary" size="medium" fullWidth>VIEW LAST PRESCRIPTION</Button>
+            <div className="mt-5 md:mt-6">
+              <Button variant="secondary" size="medium" fullWidth onClick={handleViewLastPrescription}>VIEW LAST PRESCRIPTION</Button>
             </div>
           </Card>
 
           <Card>
-            <h3 className="font-sans text-xl font-bold text-zennara-dark mb-4 flex items-center gap-2">
-              <Activity size={24} className="text-zennara-light" />
+            <h3 className="font-sans text-lg md:text-xl font-bold text-zennara-dark mb-3 md:mb-4 flex items-center gap-2">
+              <Activity size={20} className="text-zennara-light md:w-6 md:h-6" />
               MEDICAL SUMMARY
             </h3>
-            <div className="space-y-4 font-sans text-xl text-zennara-dark">
+            <div className="space-y-3 md:space-y-4 font-sans text-base md:text-lg lg:text-xl text-zennara-dark">
                <div>
-                 <span className="text-zennara-light block text-base">Current Medications</span>
+                 <span className="text-zennara-light block text-sm md:text-base">Current Medications</span>
                  <span>None</span>
                </div>
                <div>
-                 <span className="text-zennara-light block text-base">Chronic Conditions</span>
+                 <span className="text-zennara-light block text-sm md:text-base">Chronic Conditions</span>
                  <span>None</span>
                </div>
                <div>
-                 <span className="text-zennara-light block text-base">Total Visits</span>
+                 <span className="text-zennara-light block text-sm md:text-base">Total Visits</span>
                  <span>5</span>
                </div>
             </div>
           </Card>
         </div>
 
-        <div className="mt-8 mb-12">
+        <div className="mt-6 md:mt-8 mb-8 md:mb-12">
            <Button 
-             size="huge" 
+             size="large" 
              fullWidth 
-             className="h-[120px] text-3xl shadow-xl"
-             onClick={() => onNavigate(Screen.CONSULTATION)}
+             className="h-16 md:h-20 lg:h-24 text-xl md:text-2xl lg:text-3xl shadow-lg md:shadow-xl font-bold"
+             onClick={() => onNavigate(Screen.CONSULTATION_SESSION)}
            >
              START CONSULTATION
            </Button>
