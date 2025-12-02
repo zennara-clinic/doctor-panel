@@ -21,7 +21,9 @@ import {
   Clock,
   Sparkles,
   FileText,
-  Save
+  Save,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 
 interface ConsultationProps {
@@ -489,9 +491,24 @@ const PhotoMode = ({ onSend }: { onSend: () => void }) => {
 
 const PenMode = ({ onSend }: { onSend: () => void }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const isDrawingRef = useRef(false);
+  const toolRef = useRef<'pen' | 'eraser'>('pen');
+
+  // Update toolRef when tool changes
+  useEffect(() => {
+    toolRef.current = tool;
+    
+    // Update cursor based on tool
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.cursor = tool === 'eraser' ? 'grab' : 'crosshair';
+    }
+  }, [tool]);
 
   // Initialize canvas only once
   useEffect(() => {
@@ -501,32 +518,39 @@ const PenMode = ({ onSend }: { onSend: () => void }) => {
     // Set resolution once
     canvas.width = canvas.offsetWidth * 2;
     canvas.height = canvas.offsetHeight * 2;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: false });
     if(ctx) {
       ctx.scale(2, 2);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      
+      // Fill canvas with white background so eraser can work properly
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Strict Palm Rejection Logic
+    // Palm Rejection Logic - allows pen, mouse, and touch
     const handlePointerDown = (e: PointerEvent) => {
-      if (e.pointerType !== 'pen' && e.pointerType !== 'mouse') {
-        e.preventDefault();
-        return; 
-      }
+      e.preventDefault();
       
-      if (e.width > 5 || e.height > 5) {
-        return; 
+      // Palm rejection: reject touch events with large contact area
+      if (e.pointerType === 'touch' && (e.width > 15 || e.height > 15)) {
+        return;
       }
 
       isDrawingRef.current = true;
       const ctx = canvas.getContext('2d');
       if(!ctx) return;
       
-      // Set tool properties dynamically
-      ctx.lineWidth = tool === 'pen' ? 3 : 20;
-      ctx.strokeStyle = tool === 'pen' ? 'black' : 'white';
-      ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+      // Set tool properties dynamically based on current tool state
+      if (toolRef.current === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = 20;
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'black';
+      }
       
       const rect = canvas.getBoundingClientRect();
       ctx.beginPath();
@@ -535,12 +559,25 @@ const PenMode = ({ onSend }: { onSend: () => void }) => {
 
     const handlePointerMove = (e: PointerEvent) => {
       if (!isDrawingRef.current) return;
-      if (e.pointerType !== 'pen' && e.pointerType !== 'mouse') return;
+      e.preventDefault();
       
-      if (e.width > 5) return;
+      // Palm rejection during move
+      if (e.pointerType === 'touch' && e.width > 15) {
+        return;
+      }
 
       const ctx = canvas.getContext('2d');
       if(!ctx) return;
+      
+      // Ensure tool properties are maintained during move
+      if (toolRef.current === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = 20;
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'black';
+      }
       
       const rect = canvas.getBoundingClientRect();
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
@@ -548,7 +585,7 @@ const PenMode = ({ onSend }: { onSend: () => void }) => {
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-       if (e.pointerType !== 'pen' && e.pointerType !== 'mouse') return;
+       e.preventDefault();
        isDrawingRef.current = false;
     };
 
@@ -564,15 +601,106 @@ const PenMode = ({ onSend }: { onSend: () => void }) => {
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [tool]); // Only re-initialize if tool changes
+  }, []); // Only initialize once, never re-run
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (ctx && canvas) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Refill with white background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   };
+
+  const toggleFullscreen = async () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    try {
+      if (!isFullscreen) {
+        // Enter fullscreen
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if ((container as any).webkitRequestFullscreen) {
+          await (container as any).webkitRequestFullscreen();
+        } else if ((container as any).msRequestFullscreen) {
+          await (container as any).msRequestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
+    }
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFullscreenNow = !!(
+        document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreen(isFullscreenNow);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Adjust canvas size when entering/exiting fullscreen
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Small delay to allow DOM to update
+    setTimeout(() => {
+      const oldData = canvas.toDataURL(); // Save current drawing
+      
+      // Update canvas size
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(2, 2);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Restore white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Restore previous drawing
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = oldData;
+      }
+    }, 100);
+  }, [isFullscreen]);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-32">
@@ -611,26 +739,101 @@ const PenMode = ({ onSend }: { onSend: () => void }) => {
              </button>
            </div>
 
-           <div className="flex items-center gap-2 text-sm text-zennara-light font-medium bg-green-50 px-4 py-2 rounded-full border border-green-200">
-             <ShieldAlert size={16} className="text-green-600" />
-             <span className="text-green-700">Palm Rejection Active</span>
-           </div>
-         </div>
+           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-zennara-light font-medium bg-green-50 px-4 py-2 rounded-full border border-green-200">
+              <ShieldAlert size={16} className="text-green-600" />
+              <span className="text-green-700">Palm Rejection Active</span>
+            </div>
+
+            <button
+              onClick={toggleMinimize}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition-all"
+              title={isMinimized ? "Expand Canvas" : "Minimize Canvas"}
+            >
+              {isMinimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
+            </button>
+
+            <button
+              onClick={toggleFullscreen}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 font-medium transition-all"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              <Maximize2 size={18} />
+            </button>
+          </div>
+        </div>
        </Card>
 
        {/* Canvas */}
-       <Card className="p-0 overflow-hidden">
-         <div className="relative h-[600px] bg-white">
-            <canvas 
-              ref={canvasRef} 
-              className="w-full h-full cursor-crosshair touch-none" 
-            />
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-200 text-4xl pointer-events-none select-none font-serif opacity-20 text-center">
-              <PenTool size={80} className="mx-auto mb-4 opacity-30" />
-              Write Prescription Here
-            </div>
+       {!isMinimized && (
+         <div ref={containerRef} className={`${isFullscreen ? 'bg-white p-6 flex flex-col gap-4' : ''}`}>
+           {isFullscreen && (
+             <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
+               <div className="flex gap-3">
+                 <button
+                   onClick={() => setTool('pen')}
+                   className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${
+                     tool === 'pen'
+                       ? 'bg-zennara-green text-white shadow-lg'
+                       : 'bg-white text-zennara-dark hover:bg-gray-100 border border-gray-200'
+                   }`}
+                 >
+                   <PenTool size={20} />
+                   Pen
+                 </button>
+                 <button
+                   onClick={() => setTool('eraser')}
+                   className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${
+                     tool === 'eraser'
+                       ? 'bg-zennara-green text-white shadow-lg'
+                       : 'bg-white text-zennara-dark hover:bg-gray-100 border border-gray-200'
+                   }`}
+                 >
+                   <Eraser size={20} />
+                   Eraser
+                 </button>
+                 <button
+                   onClick={clearCanvas}
+                   className="flex items-center gap-2 px-5 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-medium transition-all border border-red-200"
+                 >
+                   <Trash2 size={20} />
+                   Clear
+                 </button>
+               </div>
+               <button
+                 onClick={toggleFullscreen}
+                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 font-medium transition-all border border-purple-200"
+               >
+                 <Minimize2 size={20} />
+                 Exit Fullscreen
+               </button>
+             </div>
+           )}
+           
+           <Card className="p-0 overflow-hidden">
+             <div className={`relative bg-white transition-all ${
+               isFullscreen ? 'h-[calc(100vh-140px)]' : 'h-[600px]'
+             }`}>
+                <canvas 
+                  ref={canvasRef} 
+                  className="w-full h-full touch-none" 
+                />
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-200 text-4xl pointer-events-none select-none font-serif opacity-20 text-center">
+                  <PenTool size={80} className="mx-auto mb-4 opacity-30" />
+                  Write Prescription Here
+                </div>
+             </div>
+           </Card>
          </div>
-       </Card>
+       )}
+
+       {isMinimized && (
+         <Card className="p-6 bg-gray-50 text-center">
+           <Minimize2 size={40} className="mx-auto mb-3 text-gray-400" />
+           <p className="text-lg text-zennara-light">Canvas Minimized</p>
+           <p className="text-sm text-zennara-light mt-2">Click the expand button to resume drawing</p>
+         </Card>
+       )}
 
        {/* Action Buttons */}
        <Card>
